@@ -19,13 +19,13 @@ namespace WebApi.Controllers
         [HttpGet]
         public IEnumerable<Pais> Get()
         {
-            return context.paises.ToList();
+            return context.provincia.ToList();
         }
 
         [HttpGet("{id}", Name = "paisCreado") ]
         public IActionResult GetById(int id)
         {
-            var pais = context.paises.FirstOrDefault(x => x.Id == id);
+            var pais = context.provincia.Include(x => x.Provincias).FirstOrDefault(x => x.Id == id);
             if (pais == null)
                 return NotFound(); //404
 
@@ -37,7 +37,7 @@ namespace WebApi.Controllers
         {
             if (ModelState.IsValid)
             {
-                context.paises.Add(pais);
+                context.provincia.Add(pais);
                 context.SaveChanges();
                 return new CreatedAtRouteResult("paisCreado", new { id = pais.Id },pais); //201
             }
@@ -55,6 +55,21 @@ namespace WebApi.Controllers
             context.Entry(pais).State = EntityState.Modified;
             context.SaveChanges();
             return Ok();
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var pais = context.provincia.FirstOrDefault(x => x.Id == id);
+
+            if(pais == null)
+            {
+                return NotFound();
+            }
+
+            context.provincia.Remove(pais);
+            context.SaveChanges();
+            return Ok(pais);
         }
     }
 }
